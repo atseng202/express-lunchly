@@ -48,7 +48,8 @@ class Customer {
               ILIKE $1
               AND last_name 
                 ILIKE $2
-             ORDER BY last_name, first_name`, [firstName, lastName],
+             ORDER BY last_name, first_name`,
+        [`%${firstName}%`, `${lastName}%`],
       );
     } else if (splitName.length === 1) {
       let [ onlyName ] = splitName;
@@ -63,7 +64,8 @@ class Customer {
               ILIKE $1
               OR last_name 
                 ILIKE $1
-             ORDER BY last_name, first_name`, [ onlyName ],
+             ORDER BY last_name, first_name`,
+        [`%${onlyName}%`],
       );
     }
 
