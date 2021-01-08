@@ -19,14 +19,9 @@ router.get("/", async function (req, res, next) {
 /** Filtered search page: show list of customers based on 
  * search results from search form. */
 
-router.post("/search", async function (req, res, next) {
-  let name = req.body.name;
-  let customers;
-  if (!name) {
-    customers = await Customer.all();
-  } else {
-    customers = await Customer.searchCustomers(name);
-  }
+router.get("/search", async function (req, res, next) {
+  let name = req.query.name;
+  const customers = await Customer.all(name);  
   return res.render("customer_list.html", { customers });
 });
 

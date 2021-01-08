@@ -16,29 +16,29 @@ class Customer {
     this.notes = notes;
   }
 
-  /** find all customers. */
+  /** find all customers or if name provided, customers
+   * matching the input name
+   */
 
-  static async all() {
-    const results = await db.query(
-      `SELECT id,
-                  first_name AS "firstName",
-                  last_name  AS "lastName",
-                  phone,
-                  notes
-           FROM customers
-           ORDER BY last_name, first_name`
-    );
-    return results.rows.map((c) => new Customer(c));
-  }
-
-  /** find all customers that match search name. */
-  static async searchCustomers(name) {
+  static async all(name="") {
     let results;
-    let splitName = name.split(" ");
-    if (splitName.length > 1) {
-      let [firstName, lastName] = splitName;
+    if (!name) {
+      // Gets all the customers
       results = await db.query(
         `SELECT id,
+                    first_name AS "firstName",
+                    last_name  AS "lastName",
+                    phone,
+                    notes
+             FROM customers
+             ORDER BY last_name, first_name`
+      );
+    } else {
+      let splitName = name.split(" ");
+      if (splitName.length > 1) {
+        let [firstName, lastName] = splitName;
+        results = await db.query(
+          `SELECT id,
                     first_name AS "firstName",
                     last_name  AS "lastName",
                     phone,
@@ -49,12 +49,12 @@ class Customer {
               AND last_name 
                 ILIKE $2
              ORDER BY last_name, first_name`,
-        [`%${firstName}%`, `${lastName}%`]
-      );
-    } else if (splitName.length === 1) {
-      let [onlyName] = splitName;
-      results = await db.query(
-        `SELECT id,
+          [`%${firstName}%`, `${lastName}%`]
+        );
+      } else if (splitName.length === 1) {
+        let [onlyName] = splitName;
+        results = await db.query(
+          `SELECT id,
                     first_name AS "firstName",
                     last_name  AS "lastName",
                     phone,
@@ -65,10 +65,10 @@ class Customer {
               OR last_name 
                 ILIKE $1
              ORDER BY last_name, first_name`,
-        [`%${onlyName}%`]
-      );
+          [`%${onlyName}%`]
+        );
+      }
     }
-
     return results.rows.map((c) => new Customer(c));
   }
 
@@ -87,7 +87,7 @@ class Customer {
              ORDER BY COUNT(reservations.id) DESC
              LIMIT 10`
     );
-    
+
     return results.rows.map((c) => new Customer(c));
   }
 
