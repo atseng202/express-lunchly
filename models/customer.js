@@ -33,11 +33,11 @@ class Customer {
  
   /** find all customers that match search name. */
   static async searchCustomers(name) {
-
+    let results;
     let splitName = name.split(' ');
     if (splitName.length > 1) {
       let [ firstName, lastName ] = splitName;
-      const results = await db.query(
+      results = await db.query(
             `SELECT id,
                     first_name AS "firstName",
                     last_name  AS "lastName",
@@ -51,8 +51,8 @@ class Customer {
              ORDER BY last_name, first_name`, [firstName, lastName],
       );
     } else if (splitName.length === 1) {
-      let [ name ] = splitName;
-      const results = await db.query(
+      let [ onlyName ] = splitName;
+      results = await db.query(
             `SELECT id,
                     first_name AS "firstName",
                     last_name  AS "lastName",
@@ -63,7 +63,7 @@ class Customer {
               ILIKE $1
               OR last_name 
                 ILIKE $1
-             ORDER BY last_name, first_name`, [ name ],
+             ORDER BY last_name, first_name`, [ onlyName ],
       );
     }
 

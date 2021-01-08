@@ -20,7 +20,6 @@ router.get("/", async function (req, res, next) {
 
 router.post("/search", async function (req, res, next) {
   let name = req.body.name;
-  console.log('******************** name: search in routes', name)
   const customers = await Customer.searchCustomers(name);
   return res.render("customer_list.html", { customers });
 });
