@@ -30,6 +30,45 @@ class Customer {
     );
     return results.rows.map(c => new Customer(c));
   }
+ 
+  /** find all customers that match search name. */
+  static async searchCustomers(name) {
+
+    let splitName = name.split(' ');
+    if (splitName.length > 1) {
+      let [ firstName, lastName ] = splitName;
+      const results = await db.query(
+            `SELECT id,
+                    first_name AS "firstName",
+                    last_name  AS "lastName",
+                    phone,
+                    notes
+             FROM customers
+             WHERE first_name 
+              ILIKE $1
+              AND last_name 
+                ILIKE $2
+             ORDER BY last_name, first_name`, [firstName, lastName],
+      );
+    } else if (splitName.length === 1) {
+      let [ name ] = splitName;
+      const results = await db.query(
+            `SELECT id,
+                    first_name AS "firstName",
+                    last_name  AS "lastName",
+                    phone,
+                    notes
+             FROM customers
+             WHERE first_name 
+              ILIKE $1
+              OR last_name 
+                ILIKE $1
+             ORDER BY last_name, first_name`, [ name ],
+      );
+    }
+
+    return results.rows.map(c => new Customer(c));
+  }
 
   /** get a customer by ID. 
    * Maybe use NotFoundError instead of writing a customer error below and repeating work
