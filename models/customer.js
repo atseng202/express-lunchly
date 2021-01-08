@@ -20,25 +20,25 @@ class Customer {
 
   static async all() {
     const results = await db.query(
-          `SELECT id,
+      `SELECT id,
                   first_name AS "firstName",
                   last_name  AS "lastName",
                   phone,
                   notes
            FROM customers
-           ORDER BY last_name, first_name`,
+           ORDER BY last_name, first_name`
     );
-    return results.rows.map(c => new Customer(c));
+    return results.rows.map((c) => new Customer(c));
   }
- 
+
   /** find all customers that match search name. */
   static async searchCustomers(name) {
     let results;
-    let splitName = name.split(' ');
+    let splitName = name.split(" ");
     if (splitName.length > 1) {
-      let [ firstName, lastName ] = splitName;
+      let [firstName, lastName] = splitName;
       results = await db.query(
-            `SELECT id,
+        `SELECT id,
                     first_name AS "firstName",
                     last_name  AS "lastName",
                     phone,
@@ -49,12 +49,12 @@ class Customer {
               AND last_name 
                 ILIKE $2
              ORDER BY last_name, first_name`,
-        [`%${firstName}%`, `${lastName}%`],
+        [`%${firstName}%`, `${lastName}%`]
       );
     } else if (splitName.length === 1) {
-      let [ onlyName ] = splitName;
+      let [onlyName] = splitName;
       results = await db.query(
-            `SELECT id,
+        `SELECT id,
                     first_name AS "firstName",
                     last_name  AS "lastName",
                     phone,
@@ -65,27 +65,46 @@ class Customer {
               OR last_name 
                 ILIKE $1
              ORDER BY last_name, first_name`,
-        [`%${onlyName}%`],
+        [`%${onlyName}%`]
       );
     }
 
-    return results.rows.map(c => new Customer(c));
+    return results.rows.map((c) => new Customer(c));
   }
 
-  /** get a customer by ID. 
+  /* Find the top 10 customers ordered by reservations count */
+  static async getBestCustomers() {
+    const results = await db.query(
+      `SELECT customers.id,
+                          customers.first_name AS "firstName",
+                          customers.last_name  AS "lastName",
+                          customers.phone,
+                          customers.notes,
+                          COUNT(reservations.id) AS "reservationsCount"
+             FROM customers
+             JOIN reservations ON customers.id = reservations.customer_id
+             GROUP BY customers.id
+             ORDER BY COUNT(reservations.id) DESC
+             LIMIT 10`
+    );
+    
+    return results.rows.map((c) => new Customer(c));
+  }
+
+  /** get a customer by ID.
    * Maybe use NotFoundError instead of writing a customer error below and repeating work
    **/
 
   static async get(id) {
     const results = await db.query(
-          `SELECT id,
+      `SELECT id,
                   first_name AS "firstName",
                   last_name  AS "lastName",
                   phone,
                   notes
            FROM customers
            WHERE id = $1`,
-        [id],
+      [id]
     );
 
     const customer = results.rows[0];
@@ -110,26 +129,21 @@ class Customer {
   async save() {
     if (this.id === undefined) {
       const result = await db.query(
-            `INSERT INTO customers (first_name, last_name, phone, notes)
+        `INSERT INTO customers (first_name, last_name, phone, notes)
              VALUES ($1, $2, $3, $4)
              RETURNING id`,
-          [this.firstName, this.lastName, this.phone, this.notes],
+        [this.firstName, this.lastName, this.phone, this.notes]
       );
       this.id = result.rows[0].id;
     } else {
       await db.query(
-            `UPDATE customers
+        `UPDATE customers
              SET first_name=$1,
                  last_name=$2,
                  phone=$3,
                  notes=$4
-             WHERE id = $5`, [
-            this.firstName,
-            this.lastName,
-            this.phone,
-            this.notes,
-            this.id,
-          ],
+             WHERE id = $5`,
+        [this.firstName, this.lastName, this.phone, this.notes, this.id]
       );
     }
   }

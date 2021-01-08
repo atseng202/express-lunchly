@@ -16,7 +16,8 @@ router.get("/", async function (req, res, next) {
   return res.render("customer_list.html", { customers });
 });
 
-/** Searches for user in db. */
+/** Filtered search page: show list of customers based on 
+ * search results from search form. */
 
 router.post("/search", async function (req, res, next) {
   let name = req.body.name;
@@ -28,6 +29,15 @@ router.post("/search", async function (req, res, next) {
   }
   return res.render("customer_list.html", { customers });
 });
+
+/** Best Customers:
+ *  Show list of top 10 customers ordered by most reservations
+ */
+
+ router.get("/best", async function (req,res, next) {
+  const customers = await Customer.getBestCustomers();
+  return res.render("customer_list.html", { customers, isBest: true });
+ });
 
 /** Form to add a new customer. */
 
