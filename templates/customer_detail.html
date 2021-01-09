@@ -21,10 +21,19 @@
       {% if reservations %}
         <ul>
           {% for reservation in reservations %}
-            <li>
-              <b>{{ reservation.getFormattedStartAt() }}</b>
-              for {{ reservation.numGuests }}
-            </li>
+           
+            {% if reservation.isAfterToday() %}
+              <li class="text-success">
+                <b>{{ reservation.getFormattedStartAt() }}</b>
+                for {{ reservation.numGuests }}
+              </li>
+            {% else %}
+              <li class="text-danger" >
+                <b>{{ reservation.getFormattedStartAt() }}</b>
+                for {{ reservation.numGuests }}
+              </li>
+            {% endif %}
+
           {% endfor %}
         </ul>
       {% else %}
