@@ -4,6 +4,7 @@
 
 const db = require("../db");
 const Reservation = require("./reservation");
+const { BadRequestError } = require("../expressError");
 
 /** Customer of the restaurant. */
 
@@ -15,6 +16,25 @@ class Customer {
     this.phone = phone;
     this.notes = notes;
   }
+
+  get fullName() {
+    return `${this._firstName} ${this._lastName}`;
+  } 
+
+  set firstName(val) {
+    if (!val) {
+      throw new BadRequestError('Input a valid first name');
+    }
+    this._firstName = val;
+  }
+  
+  set lastName(val) {
+    if (!val) {
+      throw new BadRequestError('Input a valid last name');
+    }
+    this._lastName = val;
+  }
+
 
   /** find all customers or if name provided, customers
    * matching the input name
@@ -146,10 +166,6 @@ class Customer {
         [this.firstName, this.lastName, this.phone, this.notes, this.id]
       );
     }
-  }
-
-  fullName() {
-    return `${this.firstName} ${this.lastName}`;
   }
 }
 
